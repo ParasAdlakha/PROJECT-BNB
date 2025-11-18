@@ -1,0 +1,19 @@
+# Use a Python base image
+FROM python:3.11-slim
+
+# Set the working directory
+WORKDIR /app
+
+# Copy the dependency file and install them
+# This assumes the Docker build command is run from the `asia-agent` root
+COPY ./requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy the application code
+COPY ./app /app
+
+# Port Cloud Run expects traffic on
+ENV PORT 8080
+
+# Command to run the application using Uvicorn
+CMD exec gunicorn app.main:app --bind 0.0.0.0:$PORT --workers 4 --worker-class uvicorn.workers.UvicornWorker
